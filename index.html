@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>FORM</title>
+        <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script> -->
+        <script
+            src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=604a92a57d10a08b57c386d0"
+            type="text/javascript"
+            integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+            crossorigin="anonymous"></script>
+​
+        <!-- <script id="std-import-blocked-domais" src="https://cdn.jsdelivr.net/gh/EricBrovko/oyster-cdn@main/res.js"></script> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link type="text/css" rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rangeslider.js/2.3.0/rangeslider.min.css">
+        <link rel="stylesheet" href="https://uploads-ssl.webflow.com/604a92a57d10a08b57c386d0/css/matador-ai-staging.webflow.3bd247323.min.css">
+        <!-- <link rel="stylesheet" href="https://uploads-ssl.webflow.com/61651cc183045348b282e8b2/css/the-hbar-foundation.webflow.0521cbee8.css"> -->
+        <!-- <script src="https://boards.greenhouse.io/embed/job_board/js?for=hbarinc"></script> -->
+​
+        <style>
+            /* body {
+                color: #404040;
+                padding: 50px;
+                max-width: 500px;
+                margin: 0 auto;
+                text-align: center;
+            } */
+​
+            .rangeslider,
+            .rangeslider__fill {
+                transition: background 0.3s;
+            }
+​
+            .rangeslider--is-lowest-value {
+                background-color: white;
+            }
+​
+            .rangeslider--is-highest-value .rangeslider__fill {
+                background-color: hotpink;
+            }
+​
+            .slider-fill-class-yellow {
+                background: #fabc05;
+                position: absolute;
+            }
+​
+            .slider-fill-class-green {
+                background: #58b48a;
+                position: absolute;
+            }
+​
+            .slider-fill-class-red {
+                background: #f56d59;
+                position: absolute;
+            }
+​
+            .rangeslider__handle:after {
+                width: 0;
+                height: 0;
+            }
+​
+            .rangeslider__fill {
+                box-shadow: none;
+            }
+​
+            .slider-item {
+                width: 100%;
+            }
+​
+            .rangeslider {
+                cursor: pointer;
+            }
+​
+            .slider-price, .slider-leads-wrapper {
+                overflow: scroll;
+                white-space: nowrap;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+         <div class="slider-block">
+            <div class="slider-left">
+                <div class="slider-title">Generated leads / month</div>
+                <div class="slider-input-embed w-embed">
+                   <input
+                        type="text"
+                        class="slider-input"
+                        maxlength="256"
+                        name="leads"
+                        placeholder="Write Here..."
+                        id="leads"
+                    >
+                </div>
+​
+                <div class="slider-title">Closing Rate</div>
+                <div class="slider-item">
+                    <input id="slider-closing-rate" type="range" min="0" max="100">
+                </div>
+​
+                <div class="slider-title">Response Rate</div>
+                <div class="slider-item">
+                    <input id="slider-response-rate" type="range" min="0" max="100">
+                </div>
+​
+                <div class="slider-title">Contact Rate</div>
+                <div class="slider-item">
+                    <input id="slider-contact-rate" type="range" min="0" max="100">
+                </div>
+            </div>
+            <div class="slider-right">
+               <div class="slider-total-text">Generate up to</div>
+               <div id="total-price" class="slider-price">$500K</div>
+               <div class="slider-total-text">You can find an additional</div>
+               <div class="slider-leads-wrapper">
+                  <div id="total-leads" class="slider-leads">7</div>
+                  <div>leads/<br>month</div>
+               </div>
+            </div>
+         </div>
+​
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rangeslider.js/2.3.0/rangeslider.min.js"></script>
+        <script>
+            $(function() {
+                const leadsInput = $('#leads');
+                const totalPrice = $('#total-price');
+                const closingRangeSlider = $('#slider-closing-rate');
+                const responseRangeSlider = $('#slider-response-rate');
+                const contactRangeSlider = $('#slider-contact-rate');
+​
+                const initialValue = 50;
+                const initialSliderOptions = {
+                    polyfill: false,
+                    rangeClass: 'rangeslider slider-line',
+                };
+​
+                $("#leads").on("input", function() {
+                    this.value = Number(this.value.replace(/\D/g, ''));
+                    return calculationTotalPrice();
+                });
+​
+                $('#slider-closing-rate')
+                    .rangeslider({
+                        ...initialSliderOptions,
+                        handleClass: 'rangeslider__handle slider-dot-yellow',
+                        fillClass: 'rangeslider__fill slider-fill-class-yellow',
+​
+                        onInit: function() {
+                            closingRangeSlider.val(initialValue).change();
+                            setTimeout(function() {
+                                closingRangeSlider.rangeslider('update', true);
+                                const cursor = $(closingRangeSlider[0].nextSibling).find('.rangeslider__handle')[0];
+                                cursor.innerHTML = `<div class="slider-text-mid">${initialValue}%</div>`;
+                            }, 100);
+                        }
+                    })
+                    .on('input', function() {
+                        // console.log(`this`, this); // input range
+                        // console.log(`this.nextSibling`, this.nextSibling); // scrolling
+                        const cursor = $(this.nextSibling).find('.rangeslider__handle')[0];
+                        cursor.innerHTML = `<div class="slider-text-mid">${this.value}%</div>`;
+                        return calculationTotalPrice();
+                    });
+​
+                    $('#slider-response-rate')
+                        .rangeslider({
+                            ...initialSliderOptions,
+                            handleClass: 'rangeslider__handle slider-dot-green',
+                            fillClass: 'rangeslider__fill slider-fill-class-green',
+​
+                            onInit: function() {
+                                responseRangeSlider.val(initialValue).change();
+                                setTimeout(function() {
+                                    responseRangeSlider.rangeslider('update', true);
+                                    const cursor = $(responseRangeSlider[0].nextSibling).find('.rangeslider__handle')[0];
+                                    cursor.innerHTML = `<div class="slider-text-mid">${initialValue}%</div>`;
+                                }, 100);
+                            }
+                        })
+                        .on('input', function() {
+                            const cursor = $(this.nextSibling).find('.rangeslider__handle')[0];
+                            cursor.innerHTML = `<div class="slider-text-mid">${this.value}%</div>`;
+                            return calculationTotalPrice();
+                        });
+​
+                    $('#slider-contact-rate')
+                        .rangeslider({
+                            ...initialSliderOptions,
+                            handleClass: 'rangeslider__handle slider-dot-red',
+                            fillClass: 'rangeslider__fill slider-fill-class-red',
+​
+                            onInit: function() {
+                                contactRangeSlider.val(initialValue).change();
+                                setTimeout(function() {
+                                    contactRangeSlider.rangeslider('update', true);
+                                    const cursor = $(contactRangeSlider[0].nextSibling).find('.rangeslider__handle')[0];
+                                    cursor.innerHTML = `<div class="slider-text-mid">${initialValue}%</div>`;
+                                }, 100);
+                            }
+                        })
+                        .on('input', function() {
+                            const cursor = $(this.nextSibling).find('.rangeslider__handle')[0];
+                            cursor.innerHTML = `<div class="slider-text-mid">${this.value}%</div>`;
+                            return calculationTotalPrice();
+                        });
+​
+                function calculationTotalPrice() {
+                    // default
+                    const totalBid = 47000;
+                    // Input value: 100
+                    // s1 = 80 * 0.01 * 100
+                    // s2 = 20 * 0.01 * s1
+                    // s3 = 30 * 0.01 * s2
+​
+                    // console.log(leadsInput.val());
+                    // console.log(closingRangeSlider.val());
+                    // console.log(responseRangeSlider.val());
+                    // console.log(contactRangeSlider.val());
+​
+                    const s1 = parseInt(closingRangeSlider.val(), 10) * 0.01 * parseInt(leadsInput.val() || 0, 10);
+                    const s2 = parseInt(responseRangeSlider.val(), 10) * 0.01 * s1;
+                    const s3 = parseInt(contactRangeSlider.val(), 10) * 0.01 * s2;
+                    const totalPrice = s3 * totalBid;
+​
+                    $(`#total-leads`)[0].innerText = rounding(s3);
+                    $(`#total-price`)[0].innerText = `$${rounding(totalPrice)}K`; // $500K
+                }
+​
+                function rounding(number) {
+                    return Math.round((number + Number.EPSILON) * 100) / 100;
+                }
+​
+                calculationTotalPrice();
+            });
+        </script>
+    </body>
+</html>
